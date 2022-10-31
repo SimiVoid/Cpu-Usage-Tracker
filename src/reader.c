@@ -8,14 +8,14 @@
 
 #define READER_SLEEP 500000
 
-cpu_usage_t* cpu_usage;
-static uint32_t cpu_usage_len = 0;
+cpu_usage_raw_t* cpu_usage;
+uint32_t cpu_usage_len;
 
-static FILE* open_stat_file();
+static FILE* open_stat_file(void);
 static uint32_t cpu_usage_find_idx(const char* name);
-static cpu_usage_t cpu_usage_get_from_line(char* line);
+static cpu_usage_raw_t cpu_usage_get_from_line(char* line);
 
-int reader_main() {
+int reader_main(void) {
     extern bool sig_stop;
     FILE* stat_file = open_stat_file();
 
@@ -32,20 +32,20 @@ int reader_main() {
                 break;
             }
 
-            cpu_usage_t cpu = cpu_usage_get_from_line(line);
+            cpu_usage_raw_t cpu = cpu_usage_get_from_line(line);
 
             if(cpu_usage_len == 0 || cpu_usage == NULL) {
-                cpu_usage = (cpu_usage_t*)malloc(sizeof(cpu_usage_t));
+                cpu_usage = (cpu_usage_raw_t*)malloc(sizeof(cpu_usage_raw_t));
                 cpu_usage[cpu_usage_len++] = cpu;
             }
             else {
                 uint32_t idx = cpu_usage_find_idx(cpu.name);
                 if(idx == cpu_usage_len) {
-                    cpu_usage = (cpu_usage_t*)realloc(cpu_usage, sizeof(cpu_usage_t) * (cpu_usage_len + 1));
+                    cpu_usage = (cpu_usage_raw_t*)realloc(cpu_usage, sizeof(cpu_usage_raw_t) * (cpu_usage_len + 1));
                     cpu_usage[cpu_usage_len++] = cpu;
                 }
                 else {
-                    cpu_usage_t* old_cpu = &cpu_usage[idx];
+                    cpu_usage_raw_t* old_cpu = &cpu_usage[idx];
                     free(old_cpu->name);
                     free(old_cpu->data);
                     cpu_usage[idx] = cpu;
@@ -61,7 +61,7 @@ int reader_main() {
     return 0;
 }
 
-static FILE* open_stat_file() {
+static FILE* open_stat_file(void) {
     FILE* file_handle = fopen("/proc/stat", "r");
 
     if (file_handle == NULL) {
@@ -84,8 +84,8 @@ static uint32_t cpu_usage_find_idx(const char* name) {
     return i;
 }
 
-static cpu_usage_t cpu_usage_get_from_line(char* line) {
-    cpu_usage_t cpu;
+static cpu_usage_raw_t cpu_usage_get_from_line(char* line) {
+    cpu_usage_raw_t cpu;
     cpu.name = (char*)malloc(sizeof(char) * 4);
     memcpy(cpu.name, line, 4);
 

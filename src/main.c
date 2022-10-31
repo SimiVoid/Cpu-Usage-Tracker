@@ -64,6 +64,10 @@ int start_thread(pthread_t* thread, void* (*func)(void*), int* ret) {
 }
 
 int wait_for_thread_stop(pthread_t* thread) {
+    if(thread == NULL) {
+        return 0;
+    }
+
     if(pthread_join(*thread, NULL) != 0) {
         return 1;
     }

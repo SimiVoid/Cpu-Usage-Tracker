@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <pthread.h>
 
 typedef struct {
     char* name;
@@ -11,6 +12,7 @@ typedef struct {
 } cpu_usage_raw_t;
 
 extern cpu_usage_raw_t* cpu_usage_raw;
+extern pthread_mutex_t cpu_usage_raw_mutex;
 extern uint32_t cpu_usage_raw_len;
 
 typedef struct {

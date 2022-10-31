@@ -9,6 +9,7 @@
 #define READER_SLEEP 500000
 
 cpu_usage_raw_t* cpu_usage_raw;
+pthread_mutex_t cpu_usage_raw_mutex;
 uint32_t cpu_usage_raw_len;
 
 static FILE* open_stat_file(void);
@@ -23,6 +24,10 @@ int reader_main(void) {
         return 1;
     }
 
+    if(pthread_mutex_init(&cpu_usage_raw_mutex, NULL) != 0) {
+        return 1;
+    }
+
     while (!sig_stop) {
         fseek(stat_file, 0, SEEK_SET);
         char line[1024];
@@ -33,6 +38,10 @@ int reader_main(void) {
             }
 
             cpu_usage_raw_t cpu = cpu_usage_raw_get_from_line(line);
+
+            if(pthread_mutex_trylock(&cpu_usage_raw_mutex) != 0) {
+                continue;
+            }
 
             if(cpu_usage_raw_len == 0 || cpu_usage_raw == NULL) {
                 cpu_usage_raw = (cpu_usage_raw_t*)malloc(sizeof(cpu_usage_raw_t));
@@ -51,6 +60,8 @@ int reader_main(void) {
                     cpu_usage_raw[idx] = cpu;
                 }
             }
+
+            pthread_mutex_unlock(&cpu_usage_raw_mutex);
         }
 
         usleep(READER_SLEEP);

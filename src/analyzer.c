@@ -61,6 +61,10 @@ float calculate_cpu_usage_percent(const cpu_usage_raw_t* prev, const cpu_usage_r
 }
 
 bool raw_data_is_changed(void) {
+    if(pthread_mutex_trylock(&cpu_usage_raw_mutex) != 0) {
+        return false;
+    }
+
     if(prev_cpu_usage_raw == NULL && cpu_usage_raw != NULL) {
         prev_cpu_usage_raw = cpu_usage_raw;
         return true;
@@ -74,6 +78,8 @@ bool raw_data_is_changed(void) {
             break;
         }
     }
+
+    pthread_mutex_unlock(&cpu_usage_raw_mutex);
 
     return changed;
 }

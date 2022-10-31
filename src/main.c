@@ -6,8 +6,9 @@
 #include <pthread.h>
 
 #include "reader.h"
+#include "analyzer.h"
 
-#define THREAD_COUNT 1
+#define THREAD_COUNT 2
 
 bool sig_stop = false;
 
@@ -27,6 +28,11 @@ int main(void) {
 
     // Start reader thread
     if(start_thread(&threads[0], (void* (*)(void*))reader_main, &ret) != 0) {
+        return 1;
+    }
+
+    // Start analyzer thread
+    if(start_thread(&threads[1], (void* (*)(void*))analyzer_main, &ret) != 0) {
         return 1;
     }
 

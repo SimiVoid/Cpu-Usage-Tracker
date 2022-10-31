@@ -21,6 +21,6 @@ typedef struct {
 extern cpu_usage_t* cpu_usage;
 extern uint32_t cpu_usage_len;
 
-bool cmp_cpu_usage_raw(const cpu_usage_raw_t* left, const cpu_usage_raw_t* right);
+bool cpu_usage_raw_equ(const cpu_usage_raw_t* left, const cpu_usage_raw_t* right);
 
 #endif

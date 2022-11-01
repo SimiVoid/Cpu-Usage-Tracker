@@ -12,3 +12,4 @@ function(create_test)
 endfunction(create_test)
 
 create_test(analyzer analyzer.c)
+create_test(reader reader.c)

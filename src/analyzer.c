@@ -4,13 +4,15 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <memory.h>
 
 #define ANALYZER_SLEEP 100000
 
 cpu_usage_t* cpu_usage;
+pthread_mutex_t cpu_usage_mutex;
 uint32_t cpu_usage_len;
 
-static cpu_usage_raw_t* prev_cpu_usage_raw;
+cpu_usage_raw_t* prev_cpu_usage_raw;
 
 bool raw_data_is_changed(void);
 float calculate_cpu_usage_percent(const cpu_usage_raw_t* prev, const cpu_usage_raw_t* curr);
@@ -18,10 +20,28 @@ float calculate_cpu_usage_percent(const cpu_usage_raw_t* prev, const cpu_usage_r
 int analyzer_main(void) {
     extern bool sig_stop;
 
+    if(pthread_mutex_init(&cpu_usage_mutex, NULL) != 0) {
+        return 1;
+    }
+
     while(!sig_stop) {
+        if(pthread_mutex_trylock(&cpu_usage_raw_mutex) != 0) {
+            continue;
+        }
+
         if(raw_data_is_changed()) {
+            if(pthread_mutex_trylock(&cpu_usage_mutex) != 0) {
+                pthread_mutex_unlock(&cpu_usage_raw_mutex);
+                continue;
+            }
+
             if(cpu_usage == NULL) {
                 cpu_usage = (cpu_usage_t*)malloc(sizeof(cpu_usage_t) * cpu_usage_raw_len);
+                cpu_usage_len = cpu_usage_raw_len;
+            }
+            else if(cpu_usage_len != cpu_usage_raw_len) {
+                cpu_usage = (cpu_usage_t*)realloc(cpu_usage, sizeof(cpu_usage_t) * cpu_usage_raw_len);
+                cpu_usage_len = cpu_usage_raw_len;
             }
 
             for(uint32_t i = 0; i < cpu_usage_raw_len; ++i) {
@@ -29,12 +49,17 @@ int analyzer_main(void) {
                 cpu_usage[i].usage = calculate_cpu_usage_percent(&prev_cpu_usage_raw[i], &cpu_usage_raw[i]);
             }
 
-            prev_cpu_usage_raw = cpu_usage_raw;
+            prev_cpu_usage_raw = copy_cpu_usage_raw_array(cpu_usage_raw);
+
+            pthread_mutex_unlock(&cpu_usage_mutex);
         }
+
+        pthread_mutex_unlock(&cpu_usage_raw_mutex);
 
         usleep(ANALYZER_SLEEP);
     }
 
+    pthread_mutex_destroy(&cpu_usage_mutex);
     free(cpu_usage);
 
     return 0;
@@ -61,13 +86,12 @@ float calculate_cpu_usage_percent(const cpu_usage_raw_t* prev, const cpu_usage_r
 }
 
 bool raw_data_is_changed(void) {
-    if(pthread_mutex_trylock(&cpu_usage_raw_mutex) != 0) {
-        return false;
-    }
-
     if(prev_cpu_usage_raw == NULL && cpu_usage_raw != NULL) {
-        prev_cpu_usage_raw = cpu_usage_raw;
+        prev_cpu_usage_raw = copy_cpu_usage_raw_array(cpu_usage_raw);
         return true;
+    }
+    else if(prev_cpu_usage_raw == NULL && cpu_usage_raw == NULL) {
+        return false;
     }
 
     bool changed = false;
@@ -78,8 +102,6 @@ bool raw_data_is_changed(void) {
             break;
         }
     }
-
-    pthread_mutex_unlock(&cpu_usage_raw_mutex);
 
     return changed;
 }

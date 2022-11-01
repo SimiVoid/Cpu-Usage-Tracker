@@ -21,8 +21,10 @@ typedef struct {
 } cpu_usage_t;
 
 extern cpu_usage_t* cpu_usage;
+extern pthread_mutex_t cpu_usage_mutex;
 extern uint32_t cpu_usage_len;
 
 bool cpu_usage_raw_equ(const cpu_usage_raw_t* left, const cpu_usage_raw_t* right);
+cpu_usage_raw_t* copy_cpu_usage_raw_array(const cpu_usage_raw_t* src);
 
 #endif

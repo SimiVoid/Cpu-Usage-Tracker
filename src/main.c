@@ -7,8 +7,9 @@
 
 #include "reader.h"
 #include "analyzer.h"
+#include "printer.h"
 
-#define THREAD_COUNT 2
+#define THREAD_COUNT 3
 
 bool sig_stop = false;
 
@@ -33,6 +34,11 @@ int main(void) {
 
     // Start analyzer thread
     if(start_thread(&threads[1], (void* (*)(void*))analyzer_main, &ret) != 0) {
+        return 1;
+    }
+
+    // Start printer thread
+    if(start_thread(&threads[2], (void* (*)(void*))printer_main, &ret) != 0) {
         return 1;
     }
 

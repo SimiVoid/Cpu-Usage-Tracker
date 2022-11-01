@@ -14,6 +14,8 @@ int printer_main(void) {
     while(!sig_stop) {
         system("clear");
 
+        printf("\033[0;32mCPU\tUSAGE\033[0;37m\n");
+
         if(pthread_mutex_trylock(&cpu_usage_mutex) == 0) {
             for(uint32_t i = 0; i < cpu_usage_len; ++i) {
                 print_cpu_usage_line(i);
@@ -33,5 +35,10 @@ void print_cpu_usage_line(const uint32_t line) {
         return;
     }
 
-    printf("%s:\t%3.2f%%\n", cpu_usage[line].name, cpu_usage[line].usage);
+    if(cpu_usage[line].name[3] == ' ') {
+        printf("%s:\t%3.2f%%\n", "total", cpu_usage[line].usage);
+    }
+    else {
+        printf("%s:\t%3.2f%%\n", cpu_usage[line].name, cpu_usage[line].usage);
+    }
 }

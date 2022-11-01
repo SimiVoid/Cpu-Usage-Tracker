@@ -75,6 +75,10 @@ float calculate_cpu_usage_percent(const cpu_usage_raw_t* prev, const cpu_usage_r
         return 0.0f;
     }
 
+    if(prev->data_len != curr->data_len || prev->data_len < 8) {
+        return 0.0f;
+    }
+
     uint32_t prev_idle = prev->data[3] + prev->data[4];
     uint32_t curr_idle = curr->data[3] + curr->data[4];
 

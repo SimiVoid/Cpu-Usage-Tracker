@@ -74,6 +74,7 @@ int reader_main(void) {
 
     fclose(stat_file);
     pthread_mutex_destroy(&cpu_usage_raw_mutex);
+    free(cpu_usage_raw);
 
     return 0;
 }

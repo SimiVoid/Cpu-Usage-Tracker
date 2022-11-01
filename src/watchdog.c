@@ -58,5 +58,9 @@ int watchdog_main(void) {
         usleep(WATCHDOG_SLEEP);
     }
 
+    pthread_mutex_destroy(&last_reader_time_mutex);
+    pthread_mutex_destroy(&last_analyzer_time_mutex);
+    pthread_mutex_destroy(&last_printer_time_mutex);
+
     return 0;
 }

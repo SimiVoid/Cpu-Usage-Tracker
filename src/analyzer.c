@@ -66,6 +66,7 @@ int analyzer_main(void) {
 
     pthread_mutex_destroy(&cpu_usage_mutex);
     free(cpu_usage);
+    free(prev_cpu_usage_raw);
 
     return 0;
 }

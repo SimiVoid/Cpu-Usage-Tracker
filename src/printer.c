@@ -21,6 +21,11 @@ int printer_main(void) {
                 print_cpu_usage_line(i);
             }
 
+            if(pthread_mutex_lock(&last_analyzer_time_mutex) == 0) {
+                last_printer_time = clock();
+                pthread_mutex_unlock(&last_analyzer_time_mutex);
+            }
+
             pthread_mutex_unlock(&cpu_usage_mutex);
         }
 

@@ -9,7 +9,7 @@
 #include "analyzer.h"
 #include "printer.h"
 
-#define THREAD_COUNT 3
+#define THREAD_COUNT 4
 
 bool sig_stop = false;
 
@@ -41,6 +41,12 @@ int main(void) {
     if(start_thread(&threads[2], (void* (*)(void*))printer_main, &ret) != 0) {
         return 1;
     }
+
+    // Start watchdog thread
+    if(start_thread(&threads[3], (void* (*)(void*))watchdog_main, &ret) != 0) {
+        return 1;
+    }
+
 
     while(!sig_stop) {
         if(ret != 0) {

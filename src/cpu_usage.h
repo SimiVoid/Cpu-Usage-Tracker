@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+#include "watchdog.h"
+
 typedef struct {
     char* name;
     uint32_t* data;

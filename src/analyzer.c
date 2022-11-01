@@ -56,6 +56,11 @@ int analyzer_main(void) {
 
         pthread_mutex_unlock(&cpu_usage_raw_mutex);
 
+        if(pthread_mutex_lock(&last_analyzer_time_mutex) == 0) {
+            last_analyzer_time = clock();
+            pthread_mutex_unlock(&last_analyzer_time_mutex);
+        }
+
         usleep(ANALYZER_SLEEP);
     }
 

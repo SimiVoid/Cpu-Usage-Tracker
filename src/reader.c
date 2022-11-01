@@ -64,6 +64,11 @@ int reader_main(void) {
 
         pthread_mutex_unlock(&cpu_usage_raw_mutex);
 
+        if(pthread_mutex_lock(&last_reader_time_mutex) == 0) {
+            last_reader_time = clock();
+            pthread_mutex_unlock(&last_reader_time_mutex);
+        }
+
         usleep(READER_SLEEP);
     }
 

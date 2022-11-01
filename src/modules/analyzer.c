@@ -15,7 +15,6 @@ uint32_t cpu_usage_len;
 cpu_usage_raw_t* prev_cpu_usage_raw;
 
 bool raw_data_is_changed(void);
-float calculate_cpu_usage_percent(const cpu_usage_raw_t* prev, const cpu_usage_raw_t* curr);
 
 int analyzer_main(void) {
     extern bool sig_stop;

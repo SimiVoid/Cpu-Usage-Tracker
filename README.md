@@ -11,3 +11,9 @@ cd build
 cmake ..
 make
 ```
+
+Run tests
+In directory build enter:
+```bash
+ctest
+```
